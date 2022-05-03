@@ -24,6 +24,9 @@
 		INTO board
 		VALUES((seq_board_board_no.NEXTVAL), #{userId:VARCHAR}, #{boardTitle:VARCHAR},#{boardContent:VARCHAR},
 		        #{boardCategory:VARCHAR},#{region:VARCHAR}, SYSDATE,SYSDATE,#{status})
+		<selectKey keyProperty="boardNo" resultType="Integer" order="AFTER">
+			SELECT seq_board_board_no.currval FROM dual
+		</selectKey>
 	</insert>
 	
 	<!-- SELECT ONE -->

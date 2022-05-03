@@ -15,6 +15,9 @@ public class Product {
 	private int hideStatus;
 	private Date createAt;
 	private Date updateAt;
+	
+	private ProductImg productImg;
+	
 	public int getProdNo() {
 		return prodNo;
 	}
@@ -81,6 +84,12 @@ public class Product {
 	}
 	public void setProdCategory(String prodCategory) {
 		this.prodCategory = prodCategory;
+	}
+	public ProductImg getProductImg() {
+		return productImg;
+	}
+	public void setProductImg(ProductImg productImg) {
+		this.productImg = productImg;
 	}
 	
 	

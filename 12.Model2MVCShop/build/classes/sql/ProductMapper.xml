@@ -36,6 +36,9 @@
 		INTO product
 		VALUES((seq_product_prod_no.NEXTVAL), #{user.userId:VARCHAR}, #{prodName:VARCHAR},#{prodContent:VARCHAR},
 		        #{prodCategory:VARCHAR},#{price:NUMERIC},#{user.addr:VARCHAR}, SYSDATE,SYSDATE,#{status},#{hideStatus})
+		<selectKey keyProperty="prodNo" resultType="Integer" order="AFTER">
+			SELECT seq_product_prod_no.currval FROM dual
+		</selectKey>
 	</insert>
 	
 	<!-- SELECT ONE -->

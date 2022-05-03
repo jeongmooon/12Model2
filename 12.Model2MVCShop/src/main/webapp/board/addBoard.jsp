@@ -77,7 +77,7 @@
 		</div>
 		
 		<div class="form-group">
-			<label for="prodDetail" class="col-sm-offset-1 col-sm-3 control-label">게시글</label>
+			<label for="prodDetail" class="col-sm-offset-1 col-sm-3 control-label">게시글내용</label>
 			<div class="col-sm-4">
 				<textarea type="text" class="form-control" id="boardContent" name="boardContent" placeholder="게시글"></textarea>
 			</div>
@@ -86,7 +86,7 @@
 		<div class="form-group">
 			<label for="price" class="col-sm-offset-1 col-sm-3 control-label">카테고리</label>
 			<div class="col-sm-4">
-				<input type="text" class="form-control" name="price" placeholder="원">
+				<input type="text" class="form-control" name=boardCategory placeholder="원">
 			</div>
 		</div>
 		

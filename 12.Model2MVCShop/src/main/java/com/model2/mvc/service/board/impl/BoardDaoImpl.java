@@ -23,9 +23,9 @@ public class BoardDaoImpl implements BoardDao {
 	}
 	
 	@Override
-	public void addBoard(Board board) throws Exception {
+	public int addBoard(Board board) throws Exception {
 		// TODO Auto-generated method stub
-		sqlSession.insert("BoardMapper.addBoard",board);
+		return sqlSession.insert("BoardMapper.addBoard",board);
 	}
 
 	@Override

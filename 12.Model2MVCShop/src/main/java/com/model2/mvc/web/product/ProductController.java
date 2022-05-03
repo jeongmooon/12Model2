@@ -30,8 +30,10 @@ import org.springframework.web.multipart.MultipartHttpServletRequest;
 import com.model2.mvc.common.Page;
 import com.model2.mvc.common.Search;
 import com.model2.mvc.service.domain.Product;
+import com.model2.mvc.service.domain.ProductImg;
 import com.model2.mvc.service.domain.User;
 import com.model2.mvc.service.product.ProductService;
+import com.model2.mvc.service.productImg.ProductImgService;
 
 @Controller
 @RequestMapping("/product/*")
@@ -40,6 +42,10 @@ public class ProductController {
 	@Autowired
 	@Qualifier("productServiceImpl")
 	private ProductService productService;
+	
+	@Autowired
+	@Qualifier("productImgServiceImpl")
+	private ProductImgService productImgService;
 	
 	@Value("#{commonProperties['pageUnit']}")
 	int pageUnit;
@@ -52,33 +58,30 @@ public class ProductController {
 	}
 	
 	@RequestMapping(value="addProduct", method = RequestMethod.POST)
-	public String add(@ModelAttribute("product") Product product,MultipartHttpServletRequest mRequest,MultipartFile file, HttpSession session) throws Exception {
-		System.out.println("/addProduct");
-		System.out.println(file);
-		System.out.println("\n\n"+mRequest+"\n\n");
-		String projectPath = "C:\\workspace\\12.Model2MVCShop\\src\\main\\webapp\\images\\uploadFiles";		
-		
-		List<MultipartFile> fileList = mRequest.getFiles("file");
-		
-		for(MultipartFile mf : fileList) {
-			String originName = mf.getOriginalFilename();
-			long fileSize = mf.getSize();
-			
-			System.out.println("원본이름 : "+ originName);
-			System.out.println("파일사이즈 : "+fileSize);
-			
-			UUID uuid = UUID.randomUUID();
-			String fileName = uuid+"_"+originName;
-			
-			File saveFile = new File(projectPath,fileName);
-			mf.transferTo(saveFile);
-		}		
+	public String add(@ModelAttribute("product") Product product,MultipartFile file, HttpSession session, ProductImg pdImg) throws Exception {
+		System.out.println("/addProduct");					
 		
 		User user = (User)session.getAttribute("user");
 		product.setUser(user);
 		
 		System.out.println(product);
 		productService.addProduct(product);
+		
+		if(file !=null) {
+			System.out.println(file);
+			String projectPath = "C:\\Users\\bitcamp\\git\\12Model2\\12.Model2MVCShop\\src\\main\\webapp\\images\\uploadFiles";
+			String originName = file.getOriginalFilename();
+			UUID uuid = UUID.randomUUID();
+			String fileName = uuid+"_"+originName;
+			
+			File saveFile = new File(projectPath,fileName);
+			file.transferTo(saveFile);
+			
+			pdImg.setProdNo(product.getProdNo());
+			pdImg.setImgURL(fileName);
+			productImgService.addProductImg(pdImg);
+		}
+		
 		return "redirect:/product/listProduct?searchValue=0";
 	}
 	

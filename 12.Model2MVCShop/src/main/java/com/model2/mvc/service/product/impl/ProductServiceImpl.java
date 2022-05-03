@@ -10,14 +10,20 @@ import org.springframework.stereotype.Service;
 
 import com.model2.mvc.common.Search;
 import com.model2.mvc.service.domain.Product;
+import com.model2.mvc.service.domain.ProductImg;
 import com.model2.mvc.service.product.ProductDao;
 import com.model2.mvc.service.product.ProductService;
+import com.model2.mvc.service.productImg.ProductImgDao;
 
 @Service("productServiceImpl")
 public class ProductServiceImpl implements ProductService {
 	@Autowired
 	@Qualifier("productDaoImpl")
 	private ProductDao productDao;
+	
+	@Autowired
+	@Qualifier("productImgDaoImpl")
+	private ProductImgDao productImgDao;
 	
 	public ProductServiceImpl() {
 		// TODO Auto-generated constructor stub
@@ -33,7 +39,10 @@ public class ProductServiceImpl implements ProductService {
 	@Override
 	public Product getProduct(int prodNo) throws Exception {
 		// TODO Auto-generated method stub
-		return productDao.getProduct(prodNo);
+		ProductImg pdImg =productImgDao.getProductImg(prodNo);
+		Product product = productDao.getProduct(prodNo);
+		product.setProductImg(pdImg);
+		return product;
 	}
 
 	@Override
