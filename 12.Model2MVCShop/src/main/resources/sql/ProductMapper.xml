@@ -1,0 +1,128 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="ProductMapper">
+
+	<resultMap id="productSelectMap" type="product">
+		<result property="prodNo" column="prod_no" jdbcType="NUMERIC" />
+		<result property="prodName" column="prod_name" jdbcType="VARCHAR" />
+		<result property="prodCategory" column="prod_category" jdbcType="VARCHAR" />
+		<result property="prodContent" column="prod_contents" jdbcType="VARCHAR" />
+		<result property="price" column="price" jdbcType="NUMERIC" />
+		<result property="createAt" column="create_at" jdbcType="DATE" />
+		<result property="updateAt" column="update_at" jdbcType="DATE" />
+		<result property="status" column="status" jdbcType="CHAR" />
+		<result property="hideSatus" column="hide_status" jdbcType="CHAR" />
+		
+		<association property="user" javaType="User">
+			<result property="userId" 			column="seller_id" 			jdbcType="VARCHAR"/>
+			<result property="userName"	column="user_name" 		jdbcType="VARCHAR" />
+			<result property="password" 	column="password" 		jdbcType="VARCHAR" />
+			<result property="role" 				column="role" 					jdbcType="VARCHAR" />
+			<result property="ssn" 				column="ssn" 					jdbcType="VARCHAR" />
+			<result property="phone" 			column="cell_phone" 		jdbcType="VARCHAR" />
+			<result property="addr" 				column="region" 					jdbcType="VARCHAR" />
+			<result property="email" 			column="email" 				jdbcType="NUMERIC"  />
+			<result property="regDate" 		column="reg_date" 			jdbcType="DATE" />
+		</association>
+	</resultMap>
+	
+	<!-- INSERT -->
+	<insert id="addProduct" parameterType="product">
+		INSERT
+		INTO product
+		VALUES((seq_product_prod_no.NEXTVAL), #{user.userId:VARCHAR}, #{prodName:VARCHAR},#{prodContent:VARCHAR},
+		        #{prodCategory:VARCHAR},#{price:NUMERIC},#{user.addr:VARCHAR}, SYSDATE,SYSDATE,#{status},#{hideStatus})
+	</insert>
+	
+	<!-- SELECT ONE -->
+	<select id="getProduct" parameterType="int" resultMap="productSelectMap">
+		SELECT *
+		FROM product
+		WHERE prod_no= #{value}
+	</select>
+	
+	<!-- UPDATE -->
+	<update id="updateProduct" parameterType="product">
+		UPDATE product
+		<set>
+			prod_name=#{prodName:VARCHAR},
+			prod_contents=#{prodContent:VARCHAR},
+			prod_category=#{prodCategory:VARCHAR},
+			update_at =SYSDATE,
+			price = #{price:NUMERIC}
+		</set>
+		WHERE prod_no = #{prodNo}
+	</update>
+	
+	<!-- UPDATE STATUS -->
+	<update id="updateStatusProduct" parameterType="product">
+		UPDATE product
+		<set>
+			stauts = #{status}
+		</set>
+		WHERE prod_no = #{prodNo}
+	</update>
+	
+	<!-- SELECT LIST -->
+	<select id="getProductList" parameterType="map" resultMap="productSelectMap">
+		SELECT *
+		FROM	(SELECT inner_table.*, ROWNUM AS row_seq
+				FROM	(SELECT *
+                            FROM product
+                            <if test="search.searchCondition !=null">
+                            	<where>                                
+                                    <choose>
+                                        <when test="search.searchCondition==0">
+                                        region LIKE #{user.addr}
+                                        </when>
+                                        <when test="search.searchCondition==1">
+                                        region LIKE #{user.addr}
+                                        </when>
+                                    </choose>                                
+                            	</where>
+                            </if>
+                            <choose>
+                                <when test="search.searchValue==0">
+                                    ORDER BY prod_no
+                                </when>
+                                <when test="search.searchValue==1">
+                                    ORDER BY prod_name
+                                </when>
+                                <when test="search.searchValue==2">
+                                    ORDER BY price
+                                </when>                                
+                                <when test="search.searchValue==3">
+                                    ORDER BY status DESC
+                                </when>
+                                <otherwise>
+                                    ORDER BY create_at
+                                </otherwise>
+                            </choose>)inner_table
+				WHERE ROWNUM &lt;= #{search.endRowNum})
+		WHERE row_seq BETWEEN #{search.startRowNum} AND #{search.endRowNum}
+	</select>
+	
+	<!-- ROW Count -->
+	<select id="getTotalCount" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+	  	FROM(SELECT *
+		FROM product
+		<if test="search.searchCondition !=null">
+			<where>		    
+		        <choose>
+		            <when test="search.searchCondition==0">
+		            region LIKE #{user.addr}
+		            </when>
+		            <when test="search.searchCondition==1">
+		            region LIKE #{user.addr}
+		            </when>
+		        </choose>		    
+			</where>
+		</if>) countTable
+	</select>
+	
+</mapper>

@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+		PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+		"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="PurchaseMapper">
+
+	
+	<resultMap type="purchase" id="purchaseSelectMap">
+		<result property="tranNo" column="tran_no" jdbcType="NUMERIC" />
+		<result property="status" column="status" jdbcType="NUMERIC" />	
+		<result property="createAt" column="create_at" jdbcType="DATE" />	
+		<result property="updateAt" column="update_at" jdbcType="DATE" />
+		
+		<association property="buyer" javaType="User">
+			<result property="userId" 			column="user_id" 			jdbcType="VARCHAR"/>
+			<result property="userName"	column="user_name" 		jdbcType="VARCHAR" />
+			<result property="password" 	column="password" 		jdbcType="VARCHAR" />
+			<result property="role" 				column="role" 					jdbcType="VARCHAR" />
+			<result property="ssn" 				column="ssn" 					jdbcType="VARCHAR" />
+			<result property="phone" 			column="cell_phone" 		jdbcType="VARCHAR" />
+			<result property="addr" 				column="addr" 					jdbcType="VARCHAR" />
+			<result property="email" 			column="email" 				jdbcType="NUMERIC"  />
+			<result property="regDate" 		column="reg_date" 			jdbcType="DATE" />
+		</association>
+		
+		<association property="product" javaType="Product">
+		   <result property="prodNo" column="prod_no" jdbcType="NUMERIC" />
+			<result property="prodName" column="prod_name" jdbcType="VARCHAR" />
+			<result property="prodCategory" column="prod_category" jdbcType="VARCHAR" />
+			<result property="prodContent" column="prod_contents" jdbcType="VARCHAR" />
+			<result property="price" column="price" jdbcType="NUMERIC" />
+			<result property="createAt" column="create_at" jdbcType="DATE" />
+			<result property="updateAt" column="update_at" jdbcType="DATE" />
+			<result property="status" column="stauts" jdbcType="CHAR" />
+			<result property="hideSatus" column="hide_status" jdbcType="CHAR" />
+		</association>
+	</resultMap>
+	
+	<!-- INSERT -->
+	<insert id="addPurchase" parameterType="purchase">
+		INSERT
+		INTO purchase
+		VALUES((seq_transaction_tran_no.NEXTVAL),#{product.prodNo},
+				#{buyer.userId},SYSDATE,SYSDATE, #{status})
+	</insert>
+	
+	<!-- 구매완료 -->
+	<update id="updatePurchase" parameterType="purchase">
+		UPDATE purchase
+		<set>
+			status = #{status}
+		</set>
+		WHERE buyer_id = #{buyer.userId}
+	</update>
+	
+	<!-- SELECT ONE -->
+	<select id="getPurchase" parameterType="int" resultMap="purchaseSelectMap">
+		SELECT *
+		FROM product p, purchase t,users u
+		WHERE p.prod_no=t.prod_no AND t.buyer_id=u.user_id AND t.tran_no =#{tranNo}
+	</select>
+	
+	<!-- 구매리스트 -->
+	<select id="getPurchaseList" parameterType="map" resultMap="purchaseSelectMap">
+		SELECT *
+		FROM	(SELECT inner_table.*, ROWNUM AS row_seq
+				FROM	(SELECT *
+						FROM purchase
+						<where>
+						    status = 0 AND buyer_id = #{value}
+						</where>
+						<choose>
+						    <when test="search.searchValue==0">
+						        ORDER BY prod_no
+						    </when>
+						    <when test="search.searchValue==1">
+						        ORDER BY prod_name
+						    </when>
+						    <when test="search.searchValue==2">
+						        ORDER BY price
+						    </when>
+						    <otherwise>
+						        ORDER BY create_at DESC
+						    </otherwise>
+						</choose>)inner_table
+						WHERE ROWNUM &lt;= #{search.endRowNum})
+				WHERE row_seq BETWEEN #{search.startRowNum} AND #{search.endRowNum}
+	</select>
+	
+	<!-- ROW Count -->
+	<select id="getTotalCount" parameterType="map" resultType="int">
+		SELECT COUNT(*)
+	  	FROM(SELECT *
+			FROM purchase
+			<where>
+			    status = 0 AND buyer_id = #{value}
+			</where>) countTable
+	</select>
+	
+</mapper>
